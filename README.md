@@ -1,3 +1,3 @@
 # Soft-Challenges
 
-##### Nedeljni izazov 1 - Obrada slike
+#### Nedeljni izazov 1 - Obrada slike
