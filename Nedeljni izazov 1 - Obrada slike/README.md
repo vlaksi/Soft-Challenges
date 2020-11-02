@@ -39,3 +39,11 @@ Adaptivni threshold gde se prag racuna = tezinska suma okolnih piksela, gde su t
   - cetvrti parametar je velicina kernela[prozor, tj deo slike, npr: https://prnt.sc/vazmh0 <-- slika kernela] i mi tu velicinu odredjujemo kao na oriju, za broj slojeva sto smo odlucivali, to namestamo mozda i po nekom procentu ali nema neke konvencije i to je jako vazan parametar ovde znaci 15 x 15
 
 U gausovom kernelu, u sredini se nalazi najveca vrednost a okolo se vrednosti smanjuju
+
+
+## Generalno bitno
+The contours are a useful tool for shape analysis and object detection and recognition.
+
+  - For better accuracy, use **binary images**. So before finding contours, apply **threshold or canny edge detection**.
+  - findContours function modifies the source image. So if you want source image even after finding contours, already store it to some other variables.
+  - In OpenCV, finding contours is like **finding white object from black background**. So remember, **object** to be found should be **white** and **background should be black**.
