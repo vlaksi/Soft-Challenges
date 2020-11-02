@@ -59,6 +59,7 @@ def count_blood_cells(image_path):
 
     # Marker labelling
     ret, markers = cv2.connectedComponents(sure_fg)
+
     # Add one to all labels so that sure background is not 0, but 1
     markers = markers + 1
     # Now, mark the region of unknown with zero
