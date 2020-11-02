@@ -17,9 +17,6 @@ def count_blood_cells(image_path):
     white_blood_cell_count = 0
     has_leukemia = None
 
-    #red_blood_cell_count = pronalazenje_kontura(image_path)
-
-
 
     # TODO - Prebrojati crvena i bela krvna zrnca i vratiti njihov broj kao povratnu vrednost ove procedure
 
