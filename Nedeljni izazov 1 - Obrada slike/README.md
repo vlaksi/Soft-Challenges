@@ -47,3 +47,17 @@ The contours are a useful tool for shape analysis and object detection and recog
   - For better accuracy, use **binary images**. So before finding contours, apply **threshold or canny edge detection**.
   - findContours function modifies the source image. So if you want source image even after finding contours, already store it to some other variables.
   - In OpenCV, finding contours is like **finding white object from black background**. So remember, **object** to be found should be **white** and **background should be black**.
+  
+## Morfoloske operacije
+
+### Erozija
+
+**Umanjuje** regione **belih piksela** a uvecava regione crnih piksela.
+
+### Dilacija
+
+**Uvecava** regione **belih piksela** a smanjuje regione crnih piksela.
+
+### Otvaranje i zatvaranje
+  - **otvaranje**: **erozija + dilacija** (uklanjamo sum erozijom i vracamo originalni oblik dilacijom)
+  - **zatvaranje**: **dilacija + erozija** (zatvaramo sitne otvore medju **belim pikselima** )
