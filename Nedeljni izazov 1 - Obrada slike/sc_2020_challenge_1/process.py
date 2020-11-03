@@ -20,10 +20,7 @@ def count_blood_cells(image_path):
 
     img = cv2.imread(image_path)
 
-    # boja za ljubicaste(odnosno bela krvna zrnca tj. WBC)
-    wbc_bgr_color = [156, 71, 129]
-    llfwc, ulfwc = get_limits_for_wanted_color(wbc_bgr_color)
-    mask = get_mask(img, llfwc, ulfwc)
+    white_blood_cell_count = get_wbc(img)
 
     # TODO - Prebrojati crvena i bela krvna zrnca i vratiti njihov broj kao povratnu vrednost ove procedure
 
@@ -31,6 +28,41 @@ def count_blood_cells(image_path):
 
     return red_blood_cell_count, white_blood_cell_count, has_leukemia
 
+
+def get_wbc(img):
+    granica_za_wbc = 1000
+    # TRAZIM MASKU KAKO BIH DOBIO SAMO WBC
+
+    # boja za ljubicaste(odnosno bela krvna zrnca tj. WBC)
+    wbc_bgr_color = [156, 71, 129]
+    llfwc, ulfwc = get_limits_for_wanted_color(wbc_bgr_color)
+    mask = get_mask(img, llfwc, ulfwc)
+
+    # VRSIM OTVARANJE KAKO BIH UKLONIO SUM
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+    # VRSIM DILACIJU KAKO BIH UTVRDIO WBC REGIONE
+    kernel = np.ones((8, 8), np.uint8)
+    dilation = cv2.dilate(opening, kernel, iterations=1)
+
+    # TRAZIM KONTURE
+    _, contours, _ = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    zeljene_konture = []
+    for c in contours:
+        # print(cv2.contourArea(c))
+        if cv2.contourArea(c) > granica_za_wbc:
+            zeljene_konture.append(c)
+
+    return len(zeljene_konture)
+    # draw_wanted_contours(img, zeljene_konture)
+
+
+# def draw_wanted_contours(img,zeljene_konture):
+#     image_crtanje = img.copy()
+#     cv2.drawContours(image_crtanje, zeljene_konture, -1, (255, 0, 0), 1)
+#     plt.imshow(image_crtanje)
 
 def get_limits_for_wanted_color(wanted_bgr_color):
     wanted_color = np.uint8([[wanted_bgr_color]])  # here insert the bgr values which you want to convert to hsv
