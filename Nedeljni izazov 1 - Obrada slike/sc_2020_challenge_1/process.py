@@ -30,9 +30,15 @@ def count_blood_cells(image_path):
     if red_blood_cell_count < 0:
         red_blood_cell_count = white_blood_cell_count * 5
 
-    print("path: " + image_path)
-    print("wbc: " + str(white_blood_cell_count))
-    print("rbc: " + str(red_blood_cell_count) + "\n")
+    # print("path: " + image_path)
+    # print("wbc: " + str(white_blood_cell_count))
+    # print("rbc: " + str(red_blood_cell_count) + "\n")
+
+    # TODO: NADJI PAMETNIJU PROVERU DA LI IMA ILI NEMA LEUKEMIJU
+    if white_blood_cell_count > 2:
+        has_leukemia = True
+    else:
+        has_leukemia = False
 
     # TODO - Prebrojati crvena i bela krvna zrnca i vratiti njihov broj kao povratnu vrednost ove procedure
 
