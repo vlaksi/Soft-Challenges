@@ -21,21 +21,18 @@ def count_blood_cells(image_path):
     img = cv2.imread(image_path)
 
     white_blood_cell_count = get_wbc(img)
-    sum_wbc_rbc = get_rbc_wbc_count_together(image_path)
-    # rbc sracunam tako sto od ukupnog broja oduzmem broj nadjenih wbc
-    red_blood_cell_count = sum_wbc_rbc - white_blood_cell_count
-    # TODO: OBRISATI OVO I NACI NESTO PAMENIJE
-    # Trenutno ovo sto radi je da ako wbc ima vise od sume wbc i rbc, sigurno nesto ne valja
-    # pa onda broj rbc povecam za 5 puta vise nego wbc, ZNAM LOSE JE ALI OPET NIJE U MINUSU :D
-    if red_blood_cell_count < 0:
-        red_blood_cell_count = white_blood_cell_count * 5
+    red_blood_cell_count = get_rbc(image_path)
 
-    # print("path: " + image_path)
-    # print("wbc: " + str(white_blood_cell_count))
-    # print("rbc: " + str(red_blood_cell_count) + "\n")
+    print("path: " + image_path)
+    print("rbc: " + str(red_blood_cell_count))
+    print("wbc: " + str(white_blood_cell_count) )
+
+    ukupno = red_blood_cell_count + white_blood_cell_count
+    procenat = (white_blood_cell_count / ukupno) * 100
+    print("procenat wbc: " + str(procenat) + "\n")
 
     # TODO: NADJI PAMETNIJU PROVERU DA LI IMA ILI NEMA LEUKEMIJU
-    if white_blood_cell_count > 2:
+    if procenat > 10.0:
         has_leukemia = True
     else:
         has_leukemia = False
@@ -76,47 +73,53 @@ def get_wbc(img):
     return len(zeljene_konture)
     # draw_wanted_contours(img, zeljene_konture)
 
-def get_rbc_wbc_count_together(img_path):
-    img = cv2.imread(img_path)
-    img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)  # konvert u grayscale
-    # plt.imshow(img_gray)
 
-    image_bin = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 105, 5)
-    # plt.imshow(image_bin, 'gray')
+def get_rbc(img_path):
+    """
+    OVO MI SE CINI OKEJ
+    :param img_path:
+    :return:
+    """
+    # read original image
+    image = cv2.imread(img_path)
+    # img = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
+    # plt.imshow(image)
 
-    # ZATVARAMO - NZM STO :D
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    closing = cv2.morphologyEx(image_bin, cv2.MORPH_CLOSE, kernel)
+    # MENJAM KANAL ZA RBC
+    img = image[:, :, 0]
+    # plt.imshow(img)
 
-    #plt.imshow(opening, 'gray')
+    # THRESHOLDUJEM DA BIH MOGAO LAKSE DA IZDVAJAM KONTURE
+    ret, bin_im = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    bin_im = 255 - bin_im
+    # plt.imshow(binIm, 'gray')
 
-    # VRSIM DILACIJU i OBRCEM DA OBJEKTI BUDU BELI ZBOG PRONALAZENJA KONTURA KOJE MORAJU BITI BELE
-    kernel = np.ones((8, 8), np.uint8)
-    dilation = cv2.erode(closing, kernel, iterations=1)
-    dilation = 255 - dilation
-    # plt.imshow(dilation, 'gray')
+    # drugaciji strukturni element
+    # RADIM DILACIJU DA UTEMELJIM BELE KONTURE/CELIJE/POVRSINE KOJE SE RACUNAJU
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))  # MORPH_ELIPSE, MORPH_RECT...
+    dilate_img = cv2.dilate(bin_im, kernel, iterations=1)
+    # plt.imshow(dilate_img, 'gray')  # 5 iteracija
 
     # PRONALAZIM BELE KONTURE
-    _, cnts, _ = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    _, cnts, _ = cv2.findContours(dilate_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # image_crtanje = image.copy()
+    # cv2.drawContours(image_crtanje, cnts, -1, (255, 0, 0), 1)
+    # plt.imshow(image_crtanje)
 
     zeljene_konture = []
     for c in cnts:
         # print(cv2.contourArea(c))
-        if cv2.contourArea(c) > 700:
+        if 150 < cv2.contourArea(c) < 10000:
             # print("dodao")
             # print(cv2.contourArea(c))
             zeljene_konture.append(c)
 
-    image_crtanje = img.copy()
-    cv2.drawContours(image_crtanje, zeljene_konture, -1, (255, 0, 0), 1)
+    # image_crtanje = image.copy()
+    # cv2.drawContours(image_crtanje, zeljene_konture, -1, (255, 0, 0), 1)
     # plt.imshow(image_crtanje)
-    # print(len(zeljene_konture))
     return len(zeljene_konture)
 
-# def draw_wanted_contours(img,zeljene_konture):
-#     image_crtanje = img.copy()
-#     cv2.drawContours(image_crtanje, zeljene_konture, -1, (255, 0, 0), 1)
-#     plt.imshow(image_crtanje)
 
 def get_limits_for_wanted_color(wanted_bgr_color):
     wanted_color = np.uint8([[wanted_bgr_color]])  # here insert the bgr values which you want to convert to hsv
