@@ -38,3 +38,11 @@ Uzimanjem HSV_FULL
 
 ![image](https://user-images.githubusercontent.com/45834270/98181702-2a017180-1f04-11eb-974d-68f6d1a6e2dc.png)
 
+
+# Media blurovanjem dobijem jos veci intezitet RBC-a 
+
+![image](https://user-images.githubusercontent.com/45834270/98307001-2c77d000-1fc5-11eb-999c-536e5973c64d.png)
+
+![image](https://user-images.githubusercontent.com/45834270/98307040-3a2d5580-1fc5-11eb-84a5-a239593e717b.png)
+
+
