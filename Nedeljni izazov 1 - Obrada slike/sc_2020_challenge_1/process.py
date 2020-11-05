@@ -21,7 +21,7 @@ def count_blood_cells(image_path):
     img = cv2.imread(image_path)
 
     white_blood_cell_count = get_wbc(img)
-    red_blood_cell_count = get_rbc(image_path)
+    red_blood_cell_count = get_rbc_watershed(image_path)
 
     print("path: " + image_path)
     print("rbc: " + str(red_blood_cell_count))
@@ -32,7 +32,7 @@ def count_blood_cells(image_path):
     print("procenat wbc: " + str(procenat) + "\n")
 
     # TODO: NADJI PAMETNIJU PROVERU DA LI IMA ILI NEMA LEUKEMIJU
-    if procenat > 10.0:
+    if procenat > 8.0:
         has_leukemia = True
     else:
         has_leukemia = False
@@ -118,6 +118,87 @@ def get_rbc(img_path):
     # image_crtanje = image.copy()
     # cv2.drawContours(image_crtanje, zeljene_konture, -1, (255, 0, 0), 1)
     # plt.imshow(image_crtanje)
+    return len(zeljene_konture)
+
+
+def get_rbc_watershed(img_path):
+    image = cv2.imread(img_path)
+
+    # MENJAM U KANAL POGODNIJI ZA DETEKTOVANJE RBC
+    img = image[:, :, 0]
+    # plt.imshow(img)
+
+    # TRESUJEM DA DOBIJEM SAMO BELE
+    ret, bin_im = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    bin_im = 255 - bin_im # OBRCEM KAKO BIH KASNIJE BROJAO BELE (ili crne, nisam sig :D )
+    # plt.imshow(bin_im, 'gray')
+
+    # ODREDJUJEM STA JE SIGURNO BACKGROUND
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))  # MORPH_ELIPSE, MORPH_RECT...
+    sure_bg = cv2.dilate(bin_im, kernel, iterations=4)
+    # plt.imshow(sure_bg, 'gray')  # 5 iteracija
+
+    # ODREDJUJEM STA JE SIGURNO FOREGROUND
+    dist_transform = cv2.distanceTransform(bin_im, cv2.DIST_L2, 3)
+    ret2, sure_fg = cv2.threshold(dist_transform, 0.2 * dist_transform.max(), 255, 0)
+    sure_fg = np.uint8(sure_fg)
+    # plt.imshow(sure_fg, 'gray')
+
+    # NEPOZNATA REGIJA
+    unknown = cv2.subtract(sure_bg, sure_fg)
+
+    # PRETVARANJE U MARKERE
+    ret3, markers = cv2.connectedComponents(sure_fg)
+    # MARKIRAMO SIGURNU POZADINU
+    markers = markers + 10
+    # MARKIRAMO NEPOZNATU TERITORIJU
+    markers[unknown == 255] = 0
+    # plt.imshow(markers)
+
+    # PRIMENJUJEMO WATERSHED
+    markers = cv2.watershed(image, markers)
+    # plt.imshow(markers)
+
+    # GRANICE SU OZNACENE SA -1 PA IM DODELJUJEM BOJU
+    img1 = image.copy()
+    # print(markers)
+    img1[markers > 10] = [0, 0, 0]
+    img1[markers <= 10] = [255, 255, 255]
+    # img1[markers == -1] = [0,0,0]
+    # plt.imshow(img1)
+
+    # PRETVARAM IZ WATERSHEDA U KORISNU SLIKU ZA TRAZENJE KONTURA
+    img = cv2.cvtColor(img1.copy(), cv2.COLOR_BGR2GRAY)
+    ret, image_bin = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY)  # ret je vrednost praga, image_bin je binarna slika
+    # plt.imshow(image_bin, 'gray')
+    dilacija = cv2.dilate(image_bin, (5, 5), iterations=5)
+    dilacija = dilacija - 255
+    # plt.imshow(dilacija, 'gray')
+
+    # *** KONACNO TRAZIM KONTURE***
+    # PRONALAZIM BELE KONTURE
+    _, cnts, _ = cv2.findContours(dilacija, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # image_crtanje = image.copy()
+    # cv2.drawContours(image_crtanje, cnts, -1, (255, 0, 0), 1)
+    # plt.imshow(image_crtanje)
+    # print("ukupno kontura: " + str(len(cnts)))
+
+    zeljene_konture = []
+    velike = []
+    male = []
+    for c in cnts:
+        # print(cv2.contourArea(c))
+        # print(cv2.contourArea(c))
+        if 500 < cv2.contourArea(c) < 5000:
+            # print("dodao")
+            # print(cv2.contourArea(c))
+            zeljene_konture.append(c)
+
+    image_crtanje = image.copy()
+    cv2.drawContours(image_crtanje, cnts, -1, (255, 0, 0), 1)
+    # plt.imshow(image_crtanje)
+    # print("zeljenih kontura: " + str(len(zeljene_konture)))
     return len(zeljene_konture)
 
 
