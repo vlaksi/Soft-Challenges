@@ -46,3 +46,7 @@ Uzimanjem HSV_FULL
 ![image](https://user-images.githubusercontent.com/45834270/98307040-3a2d5580-1fc5-11eb-84a5-a239593e717b.png)
 
 
+
+# Zapazanje
+
+Nije cak toliko ni lose na malim slikama, pa onda mozda izdvajata delove slike i tu probati raditi algoritam ?
