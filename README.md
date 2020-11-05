@@ -50,3 +50,5 @@ Uzimanjem HSV_FULL
 # Zapazanje
 
 Nije cak toliko ni lose na malim slikama, pa onda mozda izdvajata delove slike i tu probati raditi algoritam ?
+
+NE MOZE PO CONTOUR AREA JER NIJE ISTI AREA ZA SVEEEEEEE SLIKE ALOOOO !
