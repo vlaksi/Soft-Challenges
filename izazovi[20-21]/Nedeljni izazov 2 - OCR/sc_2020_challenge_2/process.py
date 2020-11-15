@@ -1,7 +1,8 @@
 # import libraries here
 
 from services.interaction_with_model import *
-
+from services.interaction_with_image import *
+from services.screan_printer import *
 
 def train_or_load_character_recognition_model(train_image_paths, serialization_folder):
     """
@@ -19,9 +20,7 @@ def train_or_load_character_recognition_model(train_image_paths, serialization_f
     """
     # TODO - Istrenirati model ako vec nije istreniran, ili ga samo ucitati iz foldera za serijalizaciju
 
-    print("train_image_paths: " + str(train_image_paths))
-    print("serialization_folder: " + serialization_folder)
-    print("\n")
+    # print_for_train_or_load_model(serialization_folder, train_image_paths)
 
     model = None
 
@@ -36,10 +35,14 @@ def train_or_load_character_recognition_model(train_image_paths, serialization_f
     return model
 
 
+
+
+
 def extract_text_from_image(trained_model, image_path, vocabulary):
     """
     Procedura prima objekat istreniranog modela za prepoznavanje znakova (karaktera), putanju do fotografije na kojoj
     se nalazi tekst za ekstrakciju i recnik svih poznatih reci koje se mogu naci na fotografiji.
+
     Procedura treba da ucita fotografiju sa prosledjene putanje, i da sa nje izvuce sav tekst koriscenjem
     openCV (detekcija karaktera) i prethodno istreniranog modela (prepoznavanje karaktera), i da vrati procitani tekst
     kao string.
@@ -54,4 +57,12 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     extracted_text = ""
     # TODO - Izvuci tekst sa ulazne fotografije i vratiti ga kao string
 
+    image = load_image(image_path)
+    parsed_text = read_text_from(image, trained_model)
+
+    # print_for_extract_text_from_image(image_path, trained_model, vocabulary)
+
     return extracted_text
+
+
+
