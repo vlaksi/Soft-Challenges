@@ -1,5 +1,7 @@
 # import libraries here
 
+from services.interaction_with_model import *
+
 
 def train_or_load_character_recognition_model(train_image_paths, serialization_folder):
     """
@@ -17,7 +19,20 @@ def train_or_load_character_recognition_model(train_image_paths, serialization_f
     """
     # TODO - Istrenirati model ako vec nije istreniran, ili ga samo ucitati iz foldera za serijalizaciju
 
+    print("train_image_paths: " + str(train_image_paths))
+    print("serialization_folder: " + serialization_folder)
+    print("\n")
+
     model = None
+
+    if not is_model_trained():
+        model = train_model()
+        save_model()
+    elif is_model_trained() and is_model_in_folder():
+        model = load_model()
+    else:
+        print("Error: Error during interaction with model")
+
     return model
 
 
