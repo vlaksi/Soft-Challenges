@@ -2,7 +2,16 @@
 
 from services.interaction_with_model import *
 from services.interaction_with_image import *
+from services.preparation_for_neural_network import *
 from services.screan_printer import *
+from services.regions_of_interest import *
+from services.show_result import display_result
+from services.training import *
+# Sklearn biblioteka sa implementiranim K-means algoritmom
+from sklearn import datasets
+from sklearn.cluster import KMeans
+
+
 
 def train_or_load_character_recognition_model(train_image_paths, serialization_folder):
     """
@@ -20,22 +29,9 @@ def train_or_load_character_recognition_model(train_image_paths, serialization_f
     """
     # TODO - Istrenirati model ako vec nije istreniran, ili ga samo ucitati iz foldera za serijalizaciju
 
-    # print_for_train_or_load_model(serialization_folder, train_image_paths)
-
     model = None
 
-    if not is_model_trained():
-        model = train_model()
-        save_model()
-    elif is_model_trained() and is_model_in_folder():
-        model = load_model()
-    else:
-        print("Error: Error during interaction with model")
-
     return model
-
-
-
 
 
 def extract_text_from_image(trained_model, image_path, vocabulary):
@@ -56,11 +52,6 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     """
     extracted_text = ""
     # TODO - Izvuci tekst sa ulazne fotografije i vratiti ga kao string
-
-    image = load_image(image_path)
-    parsed_text = read_text_from(image, trained_model)
-
-    # print_for_extract_text_from_image(image_path, trained_model, vocabulary)
 
     return extracted_text
 
