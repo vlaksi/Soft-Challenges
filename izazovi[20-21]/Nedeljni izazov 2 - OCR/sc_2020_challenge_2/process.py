@@ -3,6 +3,7 @@
 from pocetak import *
 from services.preparation_for_neural_network import *
 
+BROJAC = 0
 
 def train_or_load_character_recognition_model(train_image_paths, serialization_folder):
     """
@@ -65,8 +66,6 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     """
     extracted_text = ""
     # TODO - Izvuci tekst sa ulazne fotografije i vratiti ga kao string
-    if "train0" in image_path:
-        print("img_path: " + image_path)
 
     distances, letters = load_image_and_find_roi_validate(image_path)
 
@@ -77,11 +76,11 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
         print("LOSA SEGMENTACIJA SE DESILA: pronadjeno manje od 3 slova")
     else:
         extracted_text = extract_text(distances, letters, trained_model, vocabulary)
+        # extracted_text = extract_text_without_vocabulary(distances, letters, trained_model)
 
         if "train0" in image_path:
-            print(extracted_text)
-
-    print("\n")
+            print("\n\n \t\timg_path: " + image_path)
+            print("\t\tekstrakovan tekst: " + extracted_text + "\n\n\n\n")
 
     return extracted_text
 
