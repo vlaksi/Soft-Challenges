@@ -1,5 +1,5 @@
 from fuzzywuzzy import process
-
+from fuzzywuzzy import fuzz
 
 def procesiraj(recenica_za_obradu, vocabulary):
     """
@@ -15,13 +15,14 @@ def procesiraj(recenica_za_obradu, vocabulary):
 
     for rec in recenica:
         str2Match = rec
-        Ratios = process.extract(str2Match, strOptions)
-        #print(Ratios)
+        Ratios = process.extract(str2Match, strOptions, scorer=fuzz.token_set_ratio)
+        # print(Ratios)
         highest = find_most_similar(Ratios, rec)
         # You can also select the string with the highest matching percentage
-        # highest = process.extractOne(str2Match, strOptions)
-        #print("\t\trec: " + rec)
-        #print("\t\tnaslicnija rec: "+highest + "\n")
+        # highest = process.extractOne(str2Match, strOptions, scorer=fuzz.token_set_ratio)
+        # highest = highest[0]
+        # print("\t\trec: " + rec)
+        # print("\t\tnaslicnija rec: "+highest + "\n")
         if procesirana_recenica is None:
             procesirana_recenica = highest + ' '
         else:
@@ -29,8 +30,8 @@ def procesiraj(recenica_za_obradu, vocabulary):
 
     # Samo da izbacim ' ' sa kraja
     procesirana_recenica = procesirana_recenica[:-1]
-    #print("\t\t recenica: " + recenica_za_obradu)
-    #print("\t\t procesirana recenica: " + procesirana_recenica + "\n")
+    print("\t\t recenica: " + recenica_za_obradu)
+    print("\t\t procesirana recenica: " + procesirana_recenica + "\n")
 
     return procesirana_recenica
     # str2Match = "apple inc"
