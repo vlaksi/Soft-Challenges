@@ -50,7 +50,11 @@ def create_ann():
     '''
     ann = Sequential()
     # Postaviti slojeve neurona mreže 'ann'
-    ann.add(Dense(128, input_dim=784, activation='sigmoid'))
+    ann.add(Dense(512, input_dim=784, activation='sigmoid'))
+    ann.add(Dense(128, input_dim=512, activation='sigmoid'))
+
+    # ann.add(Dense(128, input_dim=784, activation='sigmoid'))
+    # ann.add(Dense(30, input_dim=128, activation='sigmoid'))
     ann.add(Dense(30, activation='sigmoid'))
     return ann
 
@@ -60,11 +64,11 @@ def train_ann(ann, X_train, y_train):
     y_train = np.array(y_train, np.float32)
 
     # definisanje parametra algoritma za obucavanje
-    sgd = SGD(lr=0.01, momentum=0.9)
+    sgd = SGD(lr=0.5, momentum=0.9)
     ann.compile(loss='mean_squared_error', optimizer=sgd)
 
     # obucavanje neuronske mreze
-    ann.fit(X_train, y_train, epochs=1500, batch_size=10, verbose=1, shuffle=True)
+    ann.fit(X_train, y_train, epochs=500, batch_size=1, verbose=1, shuffle=True)
 
     return ann
 

@@ -1,12 +1,7 @@
 # import libraries here
 
 from pocetak import *
-from services.postprocess import procesiraj
 from services.preparation_for_neural_network import *
-from services.show_result import *
-
-# Sklearn biblioteka sa implementiranim K-means algoritmom
-from sklearn.cluster import KMeans
 
 
 def train_or_load_character_recognition_model(train_image_paths, serialization_folder):
@@ -94,7 +89,7 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     if len(letters) < 3:
         print("LOSA SEGMENTACIJA SE DESILA: pronadjeno manje od 3 slova")
     else:
-        extracted_text = extract_text(distances, letters, trained_model)
+        extracted_text = extract_text(distances, letters, trained_model, vocabulary)
 
         if "train0" in image_path:
             print(extracted_text)
