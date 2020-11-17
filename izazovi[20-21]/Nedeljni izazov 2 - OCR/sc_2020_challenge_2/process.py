@@ -94,22 +94,7 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     if len(letters) < 3:
         print("LOSA SEGMENTACIJA SE DESILA: pronadjeno manje od 3 slova")
     else:
-        # Podešavanje centara grupa K-means algoritmom
-        distances = np.array(distances).reshape(len(distances), 1)
-        # Neophodno je da u K-means algoritam bude prosleđena matrica u kojoj vrste određuju elemente
-
-        k_means = KMeans(n_clusters=2, max_iter=2000, tol=0.00001, n_init=10)
-        k_means.fit(distances)
-
-        ## PREDIKCIJA
-        alphabet = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                    'n', 'o', 'p', 'q',
-                    'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']
-        inputs = prepare_for_ann(letters)
-        results = trained_model.predict(np.array(inputs, np.float32))
-        extracted_text = display_result(results, alphabet, k_means)
-
-        # extracted_text = procesiraj(extracted_text,vocabulary)
+        extracted_text = extract_text(distances, letters, trained_model)
 
         if "train0" in image_path:
             print(extracted_text)
@@ -117,6 +102,7 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     print("\n")
 
     return extracted_text
+
 
 
 

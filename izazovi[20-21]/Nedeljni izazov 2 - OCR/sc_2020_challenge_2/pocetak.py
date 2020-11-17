@@ -1,4 +1,5 @@
 from advanced_service import *
+from services.show_result import display_result
 
 
 def load_image_and_find_roi_train(path_img):
@@ -36,5 +37,22 @@ def load_image_and_find_roi_validate(image_path):
     img_bin = erozija.copy()
     #     plt.imshow(img_bin, 'gray')
     selected_regions, letters, distances = select_roi(image_color.copy(), img)
-    # display_image(selected_regions)
+    display_image(selected_regions)
     return distances, letters
+
+
+def extract_text(distances, letters, trained_model):
+    # Podešavanje centara grupa K-means algoritmom
+    distances = np.array(distances).reshape(len(distances), 1)
+    # Neophodno je da u K-means algoritam bude prosleđena matrica u kojoj vrste određuju elemente
+    k_means = KMeans(n_clusters=2, max_iter=2000, tol=0.00001, n_init=10)
+    k_means.fit(distances)
+    ## PREDIKCIJA
+    alphabet = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                'n', 'o', 'p', 'q',
+                'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']
+    inputs = prepare_for_ann(letters)
+    results = trained_model.predict(np.array(inputs, np.float32))
+    extracted_text = display_result(results, alphabet, k_means)
+    # extracted_text = procesiraj(extracted_text,vocabulary)
+    return extracted_text
