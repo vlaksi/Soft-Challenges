@@ -1,16 +1,12 @@
 # import libraries here
 
-from services.interaction_with_model import *
-from services.interaction_with_image import *
+from pocetak import *
+from services.postprocess import procesiraj
 from services.preparation_for_neural_network import *
-from services.screan_printer import *
-from services.regions_of_interest import *
-from services.show_result import display_result
-from services.training import *
-# Sklearn biblioteka sa implementiranim K-means algoritmom
-from sklearn import datasets
-from sklearn.cluster import KMeans
+from services.show_result import *
 
+# Sklearn biblioteka sa implementiranim K-means algoritmom
+from sklearn.cluster import KMeans
 
 
 def train_or_load_character_recognition_model(train_image_paths, serialization_folder):
@@ -29,8 +25,43 @@ def train_or_load_character_recognition_model(train_image_paths, serialization_f
     """
     # TODO - Istrenirati model ako vec nije istreniran, ili ga samo ucitati iz foldera za serijalizaciju
 
-    model = None
+    print("train_image_paths: " + str(train_image_paths))
 
+    model = None
+    letters = None
+    letters = load_image_and_find_roi_train(train_image_paths[1])
+    # for train_image_path in train_image_paths:
+    #     if letters is None:
+    #         letters = pocetak(train_image_path)
+    #     else:
+    #         letters= letters + pocetak(train_image_path)
+
+        #letters.append(letters_temp)
+    print("ukupno regiona sa slovima: " + str(len(letters)))
+    # alphabet = ['A', 'B', 'C', 'Č', 'Ć', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S','Š', 'T', 'U','V', 'W', 'X', 'Y', 'Z', 'Ž']
+    alphabet = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                'n', 'o', 'p', 'q',
+                'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']
+    # alphabet = ALPHABET
+
+    inputs = prepare_for_ann(letters)
+    outputs = convert_output(alphabet)
+    print("duzina inputa: " + str(len(inputs)))
+    print("duzina outputs: " + str(len(outputs)))
+
+    # probaj da ucitas prethodno istreniran model
+    ann = load_trained_ann()
+
+    # ako je ann=None, znaci da model nije ucitan u prethodnoj metodi i da je potrebno istrenirati novu mrezu
+    if ann is None:
+        print("Traniranje modela zapoceto.")
+        ann = create_ann()
+        ann = train_ann(ann, inputs, outputs)
+        print("Treniranje modela zavrseno.")
+        # serijalizuj novu mrezu nakon treniranja, da se ne trenira ponovo svaki put
+        serialize_ann(ann)
+
+    model = ann
     return model
 
 
@@ -52,6 +83,38 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     """
     extracted_text = ""
     # TODO - Izvuci tekst sa ulazne fotografije i vratiti ga kao string
+    if "train0" in image_path:
+        print("img_path: " + image_path)
+
+    distances, letters = load_image_and_find_roi_validate(image_path)
+
+    if "train0" in image_path:
+        print('Broj prepoznatih regiona:', len(letters))
+
+    if len(letters) < 3:
+        print("LOSA SEGMENTACIJA SE DESILA: pronadjeno manje od 3 slova")
+    else:
+        # Podešavanje centara grupa K-means algoritmom
+        distances = np.array(distances).reshape(len(distances), 1)
+        # Neophodno je da u K-means algoritam bude prosleđena matrica u kojoj vrste određuju elemente
+
+        k_means = KMeans(n_clusters=2, max_iter=2000, tol=0.00001, n_init=10)
+        k_means.fit(distances)
+
+        ## PREDIKCIJA
+        alphabet = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                    'n', 'o', 'p', 'q',
+                    'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']
+        inputs = prepare_for_ann(letters)
+        results = trained_model.predict(np.array(inputs, np.float32))
+        extracted_text = display_result(results, alphabet, k_means)
+
+        # extracted_text = procesiraj(extracted_text,vocabulary)
+
+        if "train0" in image_path:
+            print(extracted_text)
+
+    print("\n")
 
     return extracted_text
 

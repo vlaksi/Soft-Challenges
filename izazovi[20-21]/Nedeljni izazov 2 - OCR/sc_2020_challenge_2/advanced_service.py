@@ -21,7 +21,7 @@ def select_roi(image_orig, image_bin):
 #             cv2.rectangle(image_orig,(x,y),(x+w,y+h),(0,255,0),2)
         else:
             if(area > 200): # OVDE NEKU PAMETNIJU LOGIKU NAPRAVITI
-                # print("koristan region velicine: " + str(area))
+#                 print("koristan region velicine: " + str(area))
                 region = image_bin[y:y+h+1,x:x+w+1]
                 regions_array.append([resize_region(region), (x,y,w,h)])
                 cv2.rectangle(image_orig,(x,y),(x+w,y+h),(0,255,0),2)
@@ -64,7 +64,7 @@ def train_ann(ann, X_train, y_train):
     ann.compile(loss='mean_squared_error', optimizer=sgd)
 
     # obucavanje neuronske mreze
-    ann.fit(X_train, y_train, epochs=500, batch_size=1, verbose=1, shuffle=False)
+    ann.fit(X_train, y_train, epochs=1500, batch_size=10, verbose=1, shuffle=True)
 
     return ann
 
