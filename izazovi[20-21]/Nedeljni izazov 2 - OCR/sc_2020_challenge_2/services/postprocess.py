@@ -2,6 +2,13 @@ from fuzzywuzzy import process
 
 
 def procesiraj(recenica_za_obradu,vocabulary):
+    """
+    Koriscen fuzzy wuzzy koji je dat u linku na vezbama:
+    https://www.datacamp.com/community/tutorials/fuzzy-string-python
+    :param recenica_za_obradu:
+    :param vocabulary:
+    :return:
+    """
     strOptions = getList(vocabulary)
     recenica = recenica_za_obradu.split(' ')
     procesirana_recenica = None
