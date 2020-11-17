@@ -55,7 +55,7 @@ def create_ann():
 
     # ann.add(Dense(128, input_dim=784, activation='sigmoid'))
     # ann.add(Dense(30, input_dim=128, activation='sigmoid'))
-    ann.add(Dense(30, activation='sigmoid'))
+    ann.add(Dense(60, activation='sigmoid'))
     return ann
 
 
@@ -68,7 +68,7 @@ def train_ann(ann, X_train, y_train):
     ann.compile(loss='mean_squared_error', optimizer=sgd)
 
     # obucavanje neuronske mreze
-    ann.fit(X_train, y_train, epochs=500, batch_size=1, verbose=1, shuffle=True)
+    ann.fit(X_train, y_train, epochs=1500, batch_size=1, verbose=1, shuffle=True)
 
     return ann
 

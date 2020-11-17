@@ -42,18 +42,56 @@ def load_image_and_find_roi_validate(image_path):
     return distances, letters
 
 
-def extract_text(distances, letters, trained_model,vocabulary ):
+def extract_text(distances, letters, trained_model, vocabulary):
     # Podešavanje centara grupa K-means algoritmom
     distances = np.array(distances).reshape(len(distances), 1)
     # Neophodno je da u K-means algoritam bude prosleđena matrica u kojoj vrste određuju elemente
     k_means = KMeans(n_clusters=2, max_iter=2000, tol=0.00001, n_init=20)
     k_means.fit(distances)
     ## PREDIKCIJA
-    alphabet = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                'n', 'o', 'p', 'q',
-                'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']
+    alphabet0 = ['A', 'B', 'C', 'Č', 'Ć', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                 'S', 'Š', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'Ž']
+    alphabet1 = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                 'n', 'o', 'p', 'q',
+                 'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']
+    alphabet = alphabet0 + alphabet1
     inputs = prepare_for_ann(letters)
     results = trained_model.predict(np.array(inputs, np.float32))
     extracted_text = display_result(results, alphabet, k_means)
-    extracted_text = procesiraj(extracted_text,vocabulary)
+    extracted_text = procesiraj(extracted_text, vocabulary)
     return extracted_text
+
+
+def extract_text_without_vocabulary(distances, letters, trained_model):
+    # Podešavanje centara grupa K-means algoritmom
+    distances = np.array(distances).reshape(len(distances), 1)
+    # Neophodno je da u K-means algoritam bude prosleđena matrica u kojoj vrste određuju elemente
+    k_means = KMeans(n_clusters=2, max_iter=2000, tol=0.00001, n_init=20)
+    k_means.fit(distances)
+    ## PREDIKCIJA
+    alphabet0 = ['A', 'B', 'C', 'Č', 'Ć', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                 'S', 'Š', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'Ž']
+    alphabet1 = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                 'n', 'o', 'p', 'q',
+                 'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']
+    alphabet = alphabet0 + alphabet1
+
+    inputs = prepare_for_ann(letters)
+    results = trained_model.predict(np.array(inputs, np.float32))
+    extracted_text = display_result(results, alphabet, k_means)
+    return extracted_text
+
+
+def get_alphabet_and_letters(train_image_paths):
+    # image_path0 = 'dataset/train/alphabet0.png'
+    letters0 = load_image_and_find_roi_train(train_image_paths[0])
+    alphabet0 = ['A', 'B', 'C', 'Č', 'Ć', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                 'S', 'Š', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'Ž']
+    # image_path1 = 'dataset/train/alphabet1.png'
+    letters1 = load_image_and_find_roi_train(train_image_paths[1])
+    alphabet1 = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                 'n', 'o', 'p', 'q',
+                 'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']
+    alphabet = alphabet0 + alphabet1
+    letters = letters0 + letters1
+    return alphabet, letters

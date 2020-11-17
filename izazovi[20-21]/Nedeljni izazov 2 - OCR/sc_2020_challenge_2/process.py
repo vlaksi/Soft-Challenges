@@ -23,21 +23,8 @@ def train_or_load_character_recognition_model(train_image_paths, serialization_f
     print("train_image_paths: " + str(train_image_paths))
 
     model = None
-    letters = None
-    letters = load_image_and_find_roi_train(train_image_paths[1])
-    # for train_image_path in train_image_paths:
-    #     if letters is None:
-    #         letters = pocetak(train_image_path)
-    #     else:
-    #         letters= letters + pocetak(train_image_path)
-
-        #letters.append(letters_temp)
+    alphabet, letters = get_alphabet_and_letters(train_image_paths)
     print("ukupno regiona sa slovima: " + str(len(letters)))
-    # alphabet = ['A', 'B', 'C', 'Č', 'Ć', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S','Š', 'T', 'U','V', 'W', 'X', 'Y', 'Z', 'Ž']
-    alphabet = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                'n', 'o', 'p', 'q',
-                'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']
-    # alphabet = ALPHABET
 
     inputs = prepare_for_ann(letters)
     outputs = convert_output(alphabet)
