@@ -37,7 +37,7 @@ def load_image_and_find_roi_validate(image_path):
     erozija = cv2.erode(sure_bg.copy(), (3, 3), iterations=3)
     img_bin = erozija.copy()
     #     plt.imshow(img_bin, 'gray')
-    selected_regions, letters, distances = select_roi(image_color.copy(), img)
+    selected_regions, letters, distances = select_roi(image_color.copy(), img_bin)
     display_image(selected_regions)
     return distances, letters
 

@@ -11,20 +11,22 @@ def select_roi(image_orig, image_bin):
     #Način određivanja kontura je promenjen na spoljašnje konture: cv2.RETR_EXTERNAL
     regions_array = []
     regije_kvacica = []
+
     for contour in contours:
         x,y,w,h = cv2.boundingRect(contour)
         area = cv2.contourArea(contour)
-#         print(area)
-        if area > 100 and h < 100 and h > 15 and w > 20:
+        # print(area)
+        if area > 100 and 100 > h > 15 and w > 20:
             region = image_bin[y:y+h+1,x:x+w+1]
             regije_kvacica.append([resize_region(region), (x,y,w,h)])
-#             cv2.rectangle(image_orig,(x,y),(x+w,y+h),(0,255,0),2)
+            # cv2.rectangle(image_orig,(x,y),(x+w,y+h),(0,255,0),2)
         else:
-            if(area > 200): # OVDE NEKU PAMETNIJU LOGIKU NAPRAVITI
-#                 print("koristan region velicine: " + str(area))
+            if area > 200: # OVDE NEKU PAMETNIJU LOGIKU NAPRAVITI
+                # print("koristan region velicine: " + str(area))
                 region = image_bin[y:y+h+1,x:x+w+1]
                 regions_array.append([resize_region(region), (x,y,w,h)])
                 cv2.rectangle(image_orig,(x,y),(x+w,y+h),(0,255,0),2)
+    # print("ukupno kontura: " + str(len(contours)))
 
     # TODO: Smisliti kako spojiti kvacice i slova
     regions_array = sorted(regions_array, key=lambda item: item[1][0])
