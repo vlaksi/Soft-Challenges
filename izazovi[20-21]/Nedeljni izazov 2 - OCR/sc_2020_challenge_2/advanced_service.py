@@ -52,10 +52,10 @@ def create_ann():
     '''
     ann = Sequential()
     # Postaviti slojeve neurona mreže 'ann'
-    ann.add(Dense(512, input_dim=784, activation='sigmoid'))
-    ann.add(Dense(128, input_dim=512, activation='sigmoid'))
+    # ann.add(Dense(512, input_dim=784, activation='sigmoid'))
+    # ann.add(Dense(128, input_dim=512, activation='sigmoid'))
 
-    # ann.add(Dense(128, input_dim=784, activation='sigmoid'))
+    ann.add(Dense(128, input_dim=784, activation='sigmoid'))
     # ann.add(Dense(30, input_dim=128, activation='sigmoid'))
     ann.add(Dense(60, activation='sigmoid'))
     return ann
