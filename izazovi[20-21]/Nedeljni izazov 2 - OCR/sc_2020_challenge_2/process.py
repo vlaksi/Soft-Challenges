@@ -67,7 +67,7 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     extracted_text = ""
     # TODO - Izvuci tekst sa ulazne fotografije i vratiti ga kao string
 
-    distances, letters = load_image_and_find_roi_validate(image_path)
+    distances, letters = load_image_and_find_roi_HSV_validate(image_path)
 
     if "train0" in image_path:
         print('Broj prepoznatih regiona:', len(letters))

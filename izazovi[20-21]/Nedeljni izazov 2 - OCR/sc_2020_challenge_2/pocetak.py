@@ -29,17 +29,57 @@ def load_image_and_find_roi_validate(image_path):
     image_color = load_image(image_path)
     img = invert(image_bin_optimized(image_optimized_channel(image_color)))
     # noise removal
-    kernel = np.ones((3, 3), np.uint8)
-    opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=4)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
     # sure background area
     sure_bg = cv2.dilate(opening, kernel, iterations=2)
     # ciscenje slova
-    erozija = cv2.erode(sure_bg.copy(), (3, 3), iterations=3)
+    erozija = cv2.erode(sure_bg.copy(), kernel, iterations=3)
     img_bin = erozija.copy()
     #     plt.imshow(img_bin, 'gray')
     selected_regions, letters, distances = select_roi(image_color.copy(), img_bin)
-    display_image(selected_regions)
+    # display_image(selected_regions)
     return distances, letters
+
+
+def load_image_and_find_roi_HSV_validate(image_path):
+    img = cv2.imread(image_path)
+    image = img.copy()
+    best_channel = image[:, :, 1]
+    ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
+    invertovana = invert(image_bin)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
+    opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4))
+    closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel, iterations=1)
+    imga, contours, hierarchy = cv2.findContours(closing.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    image_crtanje = img.copy()
+    regions_array = []
+    # print("pronadjeno kontura: " + str(len(contours)))
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        region = image_bin[y:y + h + 1, x:x + w + 1]
+        if w < 10 or h < 10 or (h + w) < 100:
+            #         print("\t\t\th: " + str(h) + " w: " + str(w) + " size: " + str(h + w))
+            continue
+        cv2.rectangle(image_crtanje, (x, y), (x + w, y + h), (0, 255, 0), 4)
+        #     print("h: " + str(h) + " w: " + str(w) + " size: " + str(h + w))
+        regions_array.append([resize_region(region), (x, y, w, h)])
+
+    regions_array = sorted(regions_array, key=lambda item: item[1][0])
+
+    sorted_regions = [invert(region[0]) for region in regions_array]
+    sorted_rectangles = [region[1] for region in regions_array]
+    region_distances = []
+    # Izdvojiti sortirane parametre opisujućih pravougaonika
+    # Izračunati rastojanja između svih susednih regiona po x osi i dodati ih u region_distances niz
+    for index in range(0, len(sorted_rectangles) - 1):
+        current = sorted_rectangles[index]
+        next_rect = sorted_rectangles[index + 1]
+        distance = next_rect[0] - (current[0] + current[2])  # X_next - (X_current + W_current)
+        region_distances.append(distance)
+
+    return region_distances, sorted_regions
 
 
 def extract_text(distances, letters, trained_model, vocabulary):

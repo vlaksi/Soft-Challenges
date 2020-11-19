@@ -31,6 +31,16 @@ def image_optimized_channel(image):
     return only_one_channel_image
 
 
+def image_hsv(image):
+    best_channel = image[:, :, 0]
+    return best_channel
+
+
+def image_ots(image_hsv_with_one_channel):
+    ret, image_bin = cv2.threshold(image_hsv_with_one_channel, 0, 255, cv2.THRESH_OTSU)
+    return image_bin
+
+
 def image_bin(image_gs):
     ret, image_bin = cv2.threshold(image_gs, 127, 255, cv2.THRESH_BINARY)
     return image_bin
