@@ -59,7 +59,7 @@ def load_image_and_find_roi_HSV_validate(image_path):
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
         region = opening[y:y + h + 1, x:x + w + 1]
-        if w < 10 or h < 45 or (h + w) < 100:
+        if w < 10 or h < 45 or (h + w) < 50:
             #         print("\t\t\th: " + str(h) + " w: " + str(w) + " size: " + str(h + w))
             continue
         cv2.rectangle(image_crtanje, (x, y), (x + w, y + h), (0, 255, 0), 4)
