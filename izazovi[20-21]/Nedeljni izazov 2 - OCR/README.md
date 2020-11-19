@@ -139,3 +139,11 @@ Mi je koristimo u poredjenju stringova. Koristimo **Levenstajn** [algoritam](htt
 U njemu imamo opciju da indeksiramo recnik. I onda nam on automatski za neku datu rec vrati najslicniju rec.
 
 </details>
+
+
+<details>
+  <summary> Klasterovanje slova i ostalih kontura </summary> <br>
+  
+  - [ovako](https://prnt.sc/vlun2i) nekako
+  
+</details>
