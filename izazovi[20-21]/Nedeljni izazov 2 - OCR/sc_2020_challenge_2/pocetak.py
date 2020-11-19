@@ -48,27 +48,32 @@ def load_image_and_find_roi_HSV_validate(image_path):
     best_channel = image[:, :, 1]
     ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
     invertovana = invert(image_bin)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
     opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4))
-    closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel, iterations=1)
-    imga, contours, hierarchy = cv2.findContours(closing.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4))
+    # closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel, iterations=1)
+    imga, contours, hierarchy = cv2.findContours(opening.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     image_crtanje = img.copy()
     regions_array = []
     # print("pronadjeno kontura: " + str(len(contours)))
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
-        region = image_bin[y:y + h + 1, x:x + w + 1]
-        if w < 10 or h < 10 or (h + w) < 100:
+        region = opening[y:y + h + 1, x:x + w + 1]
+        if w < 10 or h < 45 or (h + w) < 100:
             #         print("\t\t\th: " + str(h) + " w: " + str(w) + " size: " + str(h + w))
             continue
         cv2.rectangle(image_crtanje, (x, y), (x + w, y + h), (0, 255, 0), 4)
         #     print("h: " + str(h) + " w: " + str(w) + " size: " + str(h + w))
         regions_array.append([resize_region(region), (x, y, w, h)])
+    # plt.imshow(closing,'gray')
+
+    # image_crtanje = img.copy()
+    # cv2.drawContours(image_crtanje, contours, -1, (255, 0, 0), 2)
+    # plt.imshow(image_crtanje)
 
     regions_array = sorted(regions_array, key=lambda item: item[1][0])
 
-    sorted_regions = [invert(region[0]) for region in regions_array]
+    sorted_regions = [region[0] for region in regions_array]
     sorted_rectangles = [region[1] for region in regions_array]
     region_distances = []
     # Izdvojiti sortirane parametre opisujućih pravougaonika
@@ -78,6 +83,10 @@ def load_image_and_find_roi_HSV_validate(image_path):
         next_rect = sorted_rectangles[index + 1]
         distance = next_rect[0] - (current[0] + current[2])  # X_next - (X_current + W_current)
         region_distances.append(distance)
+
+
+    # display_image(image_crtanje)
+    # plt.imshow(image_crtanje)
 
     return region_distances, sorted_regions
 

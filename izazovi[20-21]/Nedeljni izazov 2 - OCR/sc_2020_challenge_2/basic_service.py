@@ -23,7 +23,7 @@ def load_image(path):
 
 
 def image_gray(image):
-    return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    return
 
 
 def image_optimized_channel(image):

@@ -69,18 +69,11 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
 
     distances, letters = load_image_and_find_roi_HSV_validate(image_path)
 
-    if "train0" in image_path:
-        print('Broj prepoznatih regiona:', len(letters))
-
     if len(letters) < 3:
-        print("LOSA SEGMENTACIJA SE DESILA: pronadjeno manje od 3 slova")
+        print(image_path+" - LOSA SEGMENTACIJA SE DESILA: pronadjeno manje od 3 slova")
     else:
         extracted_text = extract_text(distances, letters, trained_model, vocabulary)
         # extracted_text = extract_text_without_vocabulary(distances, letters, trained_model)
-
-        if "train0" in image_path:
-            print("\n\n \t\timg_path: " + image_path)
-            print("\t\tekstrakovan tekst: " + extracted_text + "\n\n\n\n")
 
     return extracted_text
 
