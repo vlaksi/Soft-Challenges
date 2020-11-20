@@ -24,6 +24,35 @@ def load_image_and_find_roi_train(path_img):
     return letters
 
 
+def load_image_and_find_roi_HSV_TRAIN(image_path):
+    img = cv2.imread(image_path)
+
+    image = img.copy()
+    best_channel = image[:, :, 1]
+    ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
+    invertovana = invert(image_bin)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
+
+    imga, contours, hierarchy = cv2.findContours(opening.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    image_crtanje = img.copy()
+    regions_array = []
+    # print("pronadjeno kontura: " + str(len(contours)))
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        region = opening[y - 20:y + h + 1,
+                 x:x + w + 1]  # UBACITI NEKI HENDLER, tipa ako je y-20 <0 uraditi y - 10 tako nesto
+        area = cv2.contourArea(contour)
+        if w < 10 or h < 45 or (h + w) < 50:
+            continue
+        regions_array.append([resize_region(region), (x, y, w, h)])
+
+    regions_array = sorted(regions_array, key=lambda item: item[1][0])
+    sorted_regions = [region[0] for region in regions_array]
+
+    return sorted_regions
+
+
 def load_image_and_find_roi_validate(image_path):
     # Učitavanje slike i određivanje regiona od interesa
     image_color = load_image(image_path)
@@ -44,32 +73,29 @@ def load_image_and_find_roi_validate(image_path):
 
 def load_image_and_find_roi_HSV_validate(image_path):
     img = cv2.imread(image_path)
+
     image = img.copy()
     best_channel = image[:, :, 1]
     ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
     invertovana = invert(image_bin)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
     opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
-    # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4))
-    # closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel, iterations=1)
+
     imga, contours, hierarchy = cv2.findContours(opening.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     image_crtanje = img.copy()
     regions_array = []
     # print("pronadjeno kontura: " + str(len(contours)))
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
-        region = opening[y:y + h + 1, x:x + w + 1]
-        if w < 10 or h < 45 or (h + w) < 50:
-            #         print("\t\t\th: " + str(h) + " w: " + str(w) + " size: " + str(h + w))
-            continue
-        cv2.rectangle(image_crtanje, (x, y), (x + w, y + h), (0, 255, 0), 4)
-        #     print("h: " + str(h) + " w: " + str(w) + " size: " + str(h + w))
-        regions_array.append([resize_region(region), (x, y, w, h)])
-    # plt.imshow(closing,'gray')
+        k = y - 20
+        if k < 1:
+            k = y
 
-    # image_crtanje = img.copy()
-    # cv2.drawContours(image_crtanje, contours, -1, (255, 0, 0), 2)
-    # plt.imshow(image_crtanje)
+        region = opening[k:y + h + 1,
+                 x:x + w + 1]  # UBACITI NEKI HENDLER, tipa ako je y-20 <0 uraditi y - 10 tako nesto
+        if w < 10 or h < 45 or (h + w) < 50:
+            continue
+        regions_array.append([resize_region(region), (x, y, w, h)])
 
     regions_array = sorted(regions_array, key=lambda item: item[1][0])
 
@@ -83,7 +109,6 @@ def load_image_and_find_roi_HSV_validate(image_path):
         next_rect = sorted_rectangles[index + 1]
         distance = next_rect[0] - (current[0] + current[2])  # X_next - (X_current + W_current)
         region_distances.append(distance)
-
 
     # display_image(image_crtanje)
     # plt.imshow(image_crtanje)
@@ -133,11 +158,11 @@ def extract_text_without_vocabulary(distances, letters, trained_model):
 
 def get_alphabet_and_letters(train_image_paths):
     # image_path0 = 'dataset/train/alphabet0.png'
-    letters0 = load_image_and_find_roi_train(train_image_paths[0])
+    letters0 = load_image_and_find_roi_HSV_TRAIN(train_image_paths[0])
     alphabet0 = ['A', 'B', 'C', 'Č', 'Ć', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
                  'S', 'Š', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'Ž']
     # image_path1 = 'dataset/train/alphabet1.png'
-    letters1 = load_image_and_find_roi_train(train_image_paths[1])
+    letters1 = load_image_and_find_roi_HSV_TRAIN(train_image_paths[1])
     alphabet1 = ['a', 'b', 'c', 'č', 'ć', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
                  'n', 'o', 'p', 'q',
                  'r', 's', 'š', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'ž']

@@ -30,8 +30,8 @@ def procesiraj(recenica_za_obradu, vocabulary):
 
     # Samo da izbacim ' ' sa kraja
     procesirana_recenica = procesirana_recenica[:-1]
-    # print("\t\t recenica: " + recenica_za_obradu)
-    # print("\t\t procesirana recenica: " + procesirana_recenica + "\n")
+    print("\t\t recenica: " + recenica_za_obradu)
+    print("\t\t procesirana recenica: " + procesirana_recenica + "\n")
 
     return procesirana_recenica
     # str2Match = "apple inc"
