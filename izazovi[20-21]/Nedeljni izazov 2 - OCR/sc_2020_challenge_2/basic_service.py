@@ -4,6 +4,9 @@ import cv2
 import collections
 
 # keras
+from keras.models import Sequential
+from keras.layers.core import Dense, Activation
+from keras.optimizers import SGD
 from keras.models import model_from_json
 
 # Sklearn biblioteka sa implementiranim K-means algoritmom

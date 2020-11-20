@@ -75,7 +75,6 @@ def train_ann(ann, X_train, y_train):
 
     # definisanje parametra algoritma za obucavanje
     sgd = SGD(lr=0.5, momentum=0.9)
-    my_optimizer = keras.optimizer.Adam(learning_rate = 0.01)
     ann.compile(loss='mean_squared_error', optimizer=sgd)
 
     # obucavanje neuronske mreze
