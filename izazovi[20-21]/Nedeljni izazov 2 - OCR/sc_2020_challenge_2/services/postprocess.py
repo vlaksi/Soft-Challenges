@@ -57,10 +57,16 @@ def find_most_similar(Ratios, word):
     """
     if len(Ratios) < 2:
         return Ratios[0][0]
-    else:
-        for i in range(len(Ratios)):
-            if word == Ratios[i][0]:
-                # [i] kako bih pristupio pravom paru ('rec', procenat), a drugi [0] kako bih pristupio 'rec'i
-                return word
+
+    if word == 'l': # JER DOSTA JE RECI SA POCETNIM VELIKIM I, A DOSTA PERMUTUJE I -> l, pa da resim to
+        return 'I'
+
+    if word == 'lt':    # ovo mi takodje brka pa da resim i to
+        return 'it'
+
+    for i in range(len(Ratios)):
+        if word == Ratios[i][0]:
+            # [i] kako bih pristupio pravom paru ('rec', procenat), a drugi [0] kako bih pristupio 'rec'i
+            return word
 
     return Ratios[0][0]
