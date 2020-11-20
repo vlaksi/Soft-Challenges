@@ -34,6 +34,35 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
     opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
 
+    # ISPRAVLJANJE SLIKE
+    coords = np.column_stack(np.where(opening > 0))
+    angle = cv2.minAreaRect(coords)[-1]
+
+    # print("ugao: " + str(angle))
+    if angle < - 45:
+        angle = - (90 + angle)
+    else:
+        angle = -angle
+    # print(angle)
+    (h, w) = image.shape[:2]
+    center = (w // 2, h // 2)
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+    rotirana = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    plt.imshow(rotirana, 'gray')
+
+    img = rotirana
+    image = img.copy()
+    best_channel = image[:, :, 1]
+    ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
+    invertovana = invert(image_bin)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
+    # plt.imshow(opening, 'gray')
+
+    # ZAVRSENO ISPRAVLJANJE SLIKE
+
+    # POCETAK PRONALAZENJA KONTURA
+
     imga, contours, hierarchy = cv2.findContours(opening.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     image_crtanje = img.copy()
     regions_array = []

@@ -64,6 +64,8 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     :param vocabulary: <Dict> Recnik SVIH poznatih reci i ucestalost njihovog pojavljivanja u tekstu
     :return: <String>  Tekst procitan sa ulazne slike
     """
+    print("\n\n\t--------------------POCETAK-----------------\n\n")
+    print("slika: " + image_path)
     extracted_text = ""
     # TODO - Izvuci tekst sa ulazne fotografije i vratiti ga kao string
 
@@ -74,7 +76,7 @@ def extract_text_from_image(trained_model, image_path, vocabulary):
     else:
         extracted_text = extract_text(distances, letters, trained_model, vocabulary)
         # extracted_text = extract_text_without_vocabulary(distances, letters, trained_model)
-
+    print("\n\n\t--------------------KRAJ-----------------\n\n")
     return extracted_text
 
 
