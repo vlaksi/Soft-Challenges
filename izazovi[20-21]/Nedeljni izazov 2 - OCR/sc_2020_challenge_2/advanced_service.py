@@ -74,11 +74,11 @@ def train_ann(ann, X_train, y_train):
     y_train = np.array(y_train, np.float32)
 
     # definisanje parametra algoritma za obucavanje
-    sgd = SGD(lr=0.5, momentum=0.9)
+    sgd = SGD(lr=0.9, momentum=0.9)
     ann.compile(loss='mean_squared_error', optimizer=sgd)
 
     # obucavanje neuronske mreze
-    ann.fit(X_train, y_train, epochs=1500, batch_size=1, verbose=1, shuffle=True)
+    ann.fit(X_train, y_train, epochs=500, batch_size=1, verbose=1, shuffle=False)
 
     return ann
 
