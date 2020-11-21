@@ -156,8 +156,8 @@ def load_image_and_find_roi_HSV_validate(image_path):
             k = y
 
         region = opening[k:y + h + 1,
-                 x:x + w + 1]  # UBACITI NEKI HENDLER, tipa ako je y-20 <0 uraditi y - 10 tako nesto
-        if w < 10 or h < 45 or (h + w) < 50:
+                 x:x + w + 1]  # UBACITI NEKI HENDLER, tipa pako je y-20 <0 uraditi y - 10 tako nesto
+        if w < 10 or h < 45 or (h + w) < 40:
             continue
         region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=3)
         regions_array.append([resize_region(region), (x, y, w, h)])
