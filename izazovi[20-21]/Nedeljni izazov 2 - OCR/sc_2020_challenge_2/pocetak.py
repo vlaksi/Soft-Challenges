@@ -55,10 +55,36 @@ def load_image_and_find_roi_HSV_validate(image_path):
     # img, opening = skew_correction(image, opening, 1)
     img, opening, percent_white_pixel = check_better_channel(image, image_path, opening, percent_white_pixel)
     print("novi procenat belih: " + str(percent_white_pixel))
-
+    if percent_white_pixel > 20:
+        img, opening, percent_white_pixel = advanced_image_segmentation(image_path)
+    print("najnoviji procenat belih: " + str(percent_white_pixel))
     region_distances, sorted_regions = find_roi(img, opening, percent_white_pixel)
 
     return region_distances, sorted_regions
+
+
+def advanced_image_segmentation(image_path):
+    img = cv2.imread(image_path)
+    image = img.copy()
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    a_component = lab[:, :, 1]
+    edged = cv2.Canny(a_component, 10, 30)
+    # plt.imshow(edged, 'gray')
+    blur = cv2.GaussianBlur(edged, (9, 9), 0)
+    # blur = cv2.medianBlur(edged,1)
+    # plt.imshow(blur, 'gray')
+    # print(blur.shape)
+    ret, image_bin = cv2.threshold(blur, 0, 255, cv2.THRESH_OTSU)
+    invertovana = invert(image_bin)
+    # plt.imshow(invertovana, 'gray')
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=3)
+    # plt.imshow(opening, 'gray')
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
+    opening = cv2.morphologyEx(opening, cv2.MORPH_OPEN, kernel, iterations=4)
+    # plt.imshow(ero, 'gray')
+    percent_white_pixel = get_percents_for_white_and_black_pixels(img, opening)
+    return img, opening, percent_white_pixel
 
 
 def check_better_channel(image,image_path, opening, percent_white_pixel):
@@ -220,3 +246,14 @@ def get_alphabet_and_letters(train_image_paths):
     alphabet = alphabet0 + alphabet1
     letters = letters0 + letters1
     return alphabet, letters
+
+
+def get_limits_for_wanted_color(wanted_bgr_color):
+    wanted_color = np.uint8([[wanted_bgr_color]])  # here insert the bgr values which you want to convert to hsv
+    hsv_wanted_color = cv2.cvtColor(wanted_color, cv2.COLOR_BGR2HSV)
+    # print(hsv_wanted_color)
+
+    lower_limit_for_wanted_color = hsv_wanted_color[0][0][0] - 10, 100, 100
+    upper_limit_for_wanted_color = hsv_wanted_color[0][0][0] + 10, 255, 255
+
+    return np.array(list(lower_limit_for_wanted_color)), np.array(list(upper_limit_for_wanted_color))
