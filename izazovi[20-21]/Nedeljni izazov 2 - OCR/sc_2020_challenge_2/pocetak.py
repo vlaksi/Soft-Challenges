@@ -80,7 +80,7 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
             continue
         # # ZA SVAKI REGION RADIM POBOLJSANJE
         # TODO: PROVERITI DA LI OVO RADI BOLJE !!!!
-        region = cv2.morphologyEx(region.copy(), cv2.MORPH_OPEN, kernel, iterations=1)
+        region = cv2.morphologyEx(region.copy(), cv2.MORPH_CLOSE, kernel, iterations=1)
 
         regions_array.append([resize_region(region), (x, y, w, h)])
 
@@ -181,12 +181,12 @@ def load_image_and_find_roi_HSV_validate(image_path):
         if (w < 5 + percentWhitePixel) or (h < 25 + percentWhitePixel) or (h + w) < 40:
             # print("w: " + str(w) + " h: " + str(h) + " size: " + str(h + w))
             if h > 20 + percentWhitePixel and w < 10 + percentWhitePixel:  # vrv je I u pitanju
-                region = cv2.morphologyEx(region.copy(), cv2.MORPH_OPEN, kernel, iterations=1)
+                region = cv2.morphologyEx(region.copy(), cv2.MORPH_CLOSE, kernel, iterations=1)
                 regions_array.append([resize_region(region), (x, y, w, h)])
                 continue
             else:  # sum koji samo preskacemo
                 continue
-        region = cv2.morphologyEx(region.copy(), cv2.MORPH_OPEN, kernel, iterations=1)
+        region = cv2.morphologyEx(region.copy(), cv2.MORPH_CLOSE, kernel, iterations=1)
         regions_array.append([resize_region(region), (x, y, w, h)])
 
     regions_array = sorted(regions_array, key=lambda item: item[1][0])
