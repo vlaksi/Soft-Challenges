@@ -122,8 +122,8 @@ def get_percents_for_white_and_black_pixels(img, opening):
     # compute all black pixels
     numBlackPixel = numTotalPixel - numWhitePixel
     # print("crnih: " + str(numBlackPixel))
-    percentBlackPixel = numBlackPixel / numTotalPixel * 100;
-    percentWhitePixel = numWhitePixel / numTotalPixel * 100;
+    percentBlackPixel = numBlackPixel / numTotalPixel * 100
+    percentWhitePixel = numWhitePixel / numTotalPixel * 100
     # print("crnih: " + str(int(percentBlackPixel)) + "%")
     # print("belih: " + str(int(percentWhitePixel)) + "%")
     return percentWhitePixel

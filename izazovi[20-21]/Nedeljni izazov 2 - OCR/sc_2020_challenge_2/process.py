@@ -2,7 +2,6 @@
 
 from pocetak import *
 from services.preparation_for_neural_network import *
-from debug_helper.helper import *
 
 BROJAC = 0
 
