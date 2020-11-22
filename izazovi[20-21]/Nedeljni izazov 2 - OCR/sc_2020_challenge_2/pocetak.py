@@ -80,7 +80,7 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
             continue
         # # ZA SVAKI REGION RADIM POBOLJSANJE
         # TODO: PROVERITI DA LI OVO RADI BOLJE !!!!
-        region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=3)
+        region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=1)
 
         regions_array.append([resize_region(region), (x, y, w, h)])
 
