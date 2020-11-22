@@ -4,7 +4,7 @@ def plot_images(images):
     """
     Help to debug:https://stackoverflow.com/questions/19471814/display-multiple-images-in-one-ipython-notebook-cell
     """
-    plt.figure(figsize=(20,10))
+    plt.figure(figsize=(30,20))
     columns = 5
     for i, image in enumerate(images):
         plt.subplot(len(images)/columns + 1, columns, i + 1)

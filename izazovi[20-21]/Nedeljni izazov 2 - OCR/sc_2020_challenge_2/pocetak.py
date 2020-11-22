@@ -70,7 +70,10 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
     # print("pronadjeno kontura: " + str(len(contours)))
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
-        region = opening[y - 20:y + h + 1,
+        k = y - 20
+        if k < 1:
+            k = y
+        region = opening[y:y + h + 1,
                  x:x + w + 1]  # UBACITI NEKI HENDLER, tipa ako je y-20 <0 uraditi y - 10 tako nesto
         area = cv2.contourArea(contour)
         if w < 10 or h < 45 or (h + w) < 50:
@@ -115,6 +118,24 @@ def load_image_and_find_roi_HSV_validate(image_path):
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
     opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
 
+    # BROJANJE BROJA BELIH I CRNIH PIKSELA KAKO BIH ZNAO DA LI SU SLOVA VECEG ILI MANJEG FONTA
+    # PA NA OSNOVU TOGA KASNIJE RADIO ODREDJENO SKALIRANJE
+
+    # get all non black Pixels
+    numWhitePixel = cv2.countNonZero(opening)
+    # print("belih: " + str(numWhitePixel))
+    # get pixel count of image
+    height, width, channels = img.shape
+    numTotalPixel = height * width
+    # print("ukupno: " + str(numTotalPixel))
+    # compute all black pixels
+    numBlackPixel = numTotalPixel - numWhitePixel
+    # print("crnih: " + str(numBlackPixel))
+    percentBlackPixel = numBlackPixel / numTotalPixel * 100;
+    percentWhitePixel = numWhitePixel / numTotalPixel * 100;
+    # print("crnih: " + str(int(percentBlackPixel)) + "%")
+    # print("belih: " + str(int(percentWhitePixel)) + "%")
+
     # ISPRAVLJANJE SLIKE
     coords = np.column_stack(np.where(opening > 0))
     angle = cv2.minAreaRect(coords)[-1]
@@ -155,10 +176,15 @@ def load_image_and_find_roi_HSV_validate(image_path):
         if k < 1:
             k = y
 
-        region = opening[k:y + h + 1,
+        region = opening[y:y + h + 1,
                  x:x + w + 1]  # UBACITI NEKI HENDLER, tipa pako je y-20 <0 uraditi y - 10 tako nesto
-        if w < 10 or h < 45 or (h + w) < 40:
-            continue
+        if (w < 5 + percentWhitePixel) or (h < 25 + percentWhitePixel) or (h + w) < 40:
+            if (h > 30 + percentWhitePixel and w < 10 + percentWhitePixel):  # vrv je I u pitanju
+                region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=3)
+                regions_array.append([resize_region(region), (x, y, w, h)])
+                continue
+            else:  # sum koji samo preskacemo
+                continue
         region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=3)
         regions_array.append([resize_region(region), (x, y, w, h)])
 

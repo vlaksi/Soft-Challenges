@@ -1,6 +1,6 @@
 from __future__ import print_function
 from basic_service import *
-
+from keras.optimizers import RMSprop, Adagrad, Adam
 
 def select_roi(image_orig, image_bin):
     # plt.imshow(image_bin)
@@ -63,7 +63,9 @@ def create_ann():
     # ann.add(Dense(512, input_dim=784, activation='sigmoid'))
     # ann.add(Dense(128, input_dim=512, activation='sigmoid'))
 
-    ann.add(Dense(128, input_dim=784, activation='sigmoid'))
+    ann.add(Dense(250, input_dim=784, activation='sigmoid'))
+    # 2/3 from 784 is 517 + output is 577 neuron
+    # ann.add(Dense(128, activation='sigmoid'))
     # ann.add(Dense(30, input_dim=128, activation='sigmoid'))
     ann.add(Dense(60, activation='sigmoid'))
     return ann
@@ -75,10 +77,11 @@ def train_ann(ann, X_train, y_train):
 
     # definisanje parametra algoritma za obucavanje
     sgd = SGD(lr=0.5, momentum=0.9)
+    # opt = Adam()
     ann.compile(loss='mean_squared_error', optimizer=sgd)
-
+    # PROBATI DRUGU LOSS FJU
     # obucavanje neuronske mreze
-    ann.fit(X_train, y_train, epochs=500, batch_size=1, verbose=1, shuffle=False)
+    ann.fit(X_train, y_train, epochs=500, batch_size=1, verbose=1, shuffle=True)
 
     return ann
 
