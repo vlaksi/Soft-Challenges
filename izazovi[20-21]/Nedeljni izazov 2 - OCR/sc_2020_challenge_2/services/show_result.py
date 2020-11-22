@@ -29,18 +29,9 @@ def display_result(outputs, alphabet, k_means):
         # Dodati space karakter u slučaju da odgovarajuće rastojanje između dva slova odgovara razmaku između reči.
         # U ovu svrhu, koristiti atribut niz k_means.labels_ koji sadrži sortirana rastojanja između susednih slova.
 
-        # ako je u pitanju kvacica
-        # i ako je prethodno u pitanju C, to znaci da imamo Cv
-        # mi trebamo da zamenimo u C tvrdo C,
-        # u trenutku kad ima Cv, on ima i razmak, pa ce ga dodati
-        # tkd da treba da preskocim i ovaj if sa razmakom i samo uradim apendovanje
-        # slova C(tvrdog C)
-
-        # ako imamo Sv prebacimo u S
         letter = alphabet[winner(output)]
 
         if k_means.labels_[idx] == w_space_group:
             result += ' '
         result += letter
-    result.replace('sv ', 'AAAA')
     return result

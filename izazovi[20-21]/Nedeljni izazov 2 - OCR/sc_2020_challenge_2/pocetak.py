@@ -137,6 +137,7 @@ def load_image_and_find_roi_HSV_validate(image_path):
     # print("belih: " + str(int(percentWhitePixel)) + "%")
 
     # ISPRAVLJANJE SLIKE
+    # link: https://www.pyimagesearch.com/2017/02/20/text-skew-correction-opencv-python/
     coords = np.column_stack(np.where(opening > 0))
     angle = cv2.minAreaRect(coords)[-1]
 
