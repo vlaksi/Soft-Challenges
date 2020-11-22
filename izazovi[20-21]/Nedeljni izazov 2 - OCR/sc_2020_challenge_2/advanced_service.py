@@ -2,6 +2,7 @@ from __future__ import print_function
 from basic_service import *
 from keras.optimizers import RMSprop, Adagrad, Adam
 
+
 def select_roi(image_orig, image_bin):
     # plt.imshow(image_bin)
     '''
@@ -9,30 +10,29 @@ def select_roi(image_orig, image_bin):
     i dodatno treba da sačuva rastojanja između susednih regiona.
     '''
     img, contours, hierarchy = cv2.findContours(image_bin.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    #Način određivanja kontura je promenjen na spoljašnje konture: cv2.RETR_EXTERNAL
+    # Način određivanja kontura je promenjen na spoljašnje konture: cv2.RETR_EXTERNAL
     regions_array = []
     regije_kvacica = []
 
     for contour in contours:
-        x,y,w,h = cv2.boundingRect(contour)
+        x, y, w, h = cv2.boundingRect(contour)
         area = cv2.contourArea(contour)
         # print(area)
         if area > 100 and 100 > h > 15 and w > 20:
-            region = image_bin[y:y+h+1,x:x+w+1]
-            regije_kvacica.append([resize_region(region), (x,y,w,h)])
+            region = image_bin[y:y + h + 1, x:x + w + 1]
+            regije_kvacica.append([resize_region(region), (x, y, w, h)])
             # cv2.rectangle(image_orig,(x,y),(x+w,y+h),(0,255,0),2)
         else:
-            if area > 200: # OVDE NEKU PAMETNIJU LOGIKU NAPRAVITI
+            if area > 200:  # OVDE NEKU PAMETNIJU LOGIKU NAPRAVITI
                 # print("koristan region velicine: " + str(area))
-                region = image_bin[y:y+h+1,x:x+w+1]
-                regions_array.append([resize_region(region), (x,y,w,h)])
+                region = image_bin[y:y + h + 1, x:x + w + 1]
+                regions_array.append([resize_region(region), (x, y, w, h)])
                 # cv2.rectangle(image_orig,(x,y),(x+w,y+h),(0,255,0),2)
     # print("ukupno kontura: " + str(len(contours)))
     # plt.imshow(image_bin.copy(),'gray')
     # image_crtanje = image_orig.copy()
     # cv2.drawContours(image_crtanje, contours, -1, (255, 0, 0), 2)
     # plt.imshow(image_crtanje)
-
 
     # TODO: Smisliti kako spojiti kvacice i slova
     regions_array = sorted(regions_array, key=lambda item: item[1][0])
@@ -44,10 +44,10 @@ def select_roi(image_orig, image_bin):
     region_distances = []
     # Izdvojiti sortirane parametre opisujućih pravougaonika
     # Izračunati rastojanja između svih susednih regiona po x osi i dodati ih u region_distances niz
-    for index in range(0, len(sorted_rectangles)-1):
+    for index in range(0, len(sorted_rectangles) - 1):
         current = sorted_rectangles[index]
-        next_rect = sorted_rectangles[index+1]
-        distance = next_rect[0] - (current[0]+current[2]) #X_next - (X_current + W_current)
+        next_rect = sorted_rectangles[index + 1]
+        distance = next_rect[0] - (current[0] + current[2])  # X_next - (X_current + W_current)
         region_distances.append(distance)
 
     return image_orig, sorted_regions, region_distances

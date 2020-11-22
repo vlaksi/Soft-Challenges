@@ -3,27 +3,6 @@ from services.postprocess import procesiraj
 from services.show_result import display_result
 
 
-def load_image_and_find_roi_train(path_img):
-    # POCETAAAAAAAAAAAAK
-    image_color = load_image(path_img)
-    img = invert(image_bin_optimized(image_optimized_channel(image_color)))
-
-    # noise removal
-    kernel = np.ones((3, 3), np.uint8)
-    opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=4)
-    # sure background area
-    sure_bg = cv2.dilate(opening, kernel, iterations=2)
-    # ciscenje slova
-    erozija = cv2.erode(sure_bg.copy(), (3, 3), iterations=3)
-    img_bin = erozija.copy()
-    #     plt.imshow(img_bin, 'gray')
-    selected_regions, letters, region_distances = select_roi(image_color.copy(), img_bin)
-    display_image(selected_regions)
-    print('Broj prepoznatih regiona:', len(letters))
-
-    return letters
-
-
 def load_image_and_find_roi_HSV_TRAIN(image_path):
     img = cv2.imread(image_path)
 
@@ -38,28 +17,7 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
     coords = np.column_stack(np.where(opening > 0))
     angle = cv2.minAreaRect(coords)[-1]
 
-    # print("ugao: " + str(angle))
-    if angle < - 45:
-        angle = - (90 + angle)
-    else:
-        angle = -angle
-    # print(angle)
-    (h, w) = image.shape[:2]
-    center = (w // 2, h // 2)
-    M = cv2.getRotationMatrix2D(center, angle, 1.0)
-    rotirana = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-    plt.imshow(rotirana, 'gray')
-
-    img = rotirana
-    image = img.copy()
-    best_channel = image[:, :, 1]
-    ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
-    invertovana = invert(image_bin)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
-    # plt.imshow(opening, 'gray')
-
-    # ZAVRSENO ISPRAVLJANJE SLIKE
+    img, opening = skew_correction(image, opening)
 
     # POCETAK PRONALAZENJA KONTURA
 
@@ -90,24 +48,6 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
     return sorted_regions
 
 
-def load_image_and_find_roi_validate(image_path):
-    # Učitavanje slike i određivanje regiona od interesa
-    image_color = load_image(image_path)
-    img = invert(image_bin_optimized(image_optimized_channel(image_color)))
-    # noise removal
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
-    # sure background area
-    sure_bg = cv2.dilate(opening, kernel, iterations=2)
-    # ciscenje slova
-    erozija = cv2.erode(sure_bg.copy(), kernel, iterations=3)
-    img_bin = erozija.copy()
-    #     plt.imshow(img_bin, 'gray')
-    selected_regions, letters, distances = select_roi(image_color.copy(), img_bin)
-    # display_image(selected_regions)
-    return distances, letters
-
-
 def load_image_and_find_roi_HSV_validate(image_path):
     img = cv2.imread(image_path)
 
@@ -121,48 +61,10 @@ def load_image_and_find_roi_HSV_validate(image_path):
     # BROJANJE BROJA BELIH I CRNIH PIKSELA KAKO BIH ZNAO DA LI SU SLOVA VECEG ILI MANJEG FONTA
     # PA NA OSNOVU TOGA KASNIJE RADIO ODREDJENO SKALIRANJE
 
-    # get all non black Pixels
-    numWhitePixel = cv2.countNonZero(opening)
-    # print("belih: " + str(numWhitePixel))
-    # get pixel count of image
-    height, width, channels = img.shape
-    numTotalPixel = height * width
-    # print("ukupno: " + str(numTotalPixel))
-    # compute all black pixels
-    numBlackPixel = numTotalPixel - numWhitePixel
-    # print("crnih: " + str(numBlackPixel))
-    percentBlackPixel = numBlackPixel / numTotalPixel * 100;
-    percentWhitePixel = numWhitePixel / numTotalPixel * 100;
-    # print("crnih: " + str(int(percentBlackPixel)) + "%")
-    # print("belih: " + str(int(percentWhitePixel)) + "%")
+    percentWhitePixel = get_percents_for_white_and_black_pixels(img, opening)
 
-    # ISPRAVLJANJE SLIKE
-    # link: https://www.pyimagesearch.com/2017/02/20/text-skew-correction-opencv-python/
-    coords = np.column_stack(np.where(opening > 0))
-    angle = cv2.minAreaRect(coords)[-1]
+    img, opening = skew_correction(image, opening)
 
-    # print("ugao: " + str(angle))
-    if angle < - 45:
-        angle = - (90 + angle)
-    else:
-        angle = -angle
-    # print(angle)
-    (h, w) = image.shape[:2]
-    center = (w // 2, h // 2)
-    M = cv2.getRotationMatrix2D(center, angle, 1.0)
-    rotirana = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-    plt.imshow(rotirana, 'gray')
-
-    img = rotirana
-    image = img.copy()
-    best_channel = image[:, :, 1]
-    ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
-    invertovana = invert(image_bin)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
-    # plt.imshow(opening, 'gray')
-
-    # ZAVRSENO ISPRAVLJANJE SLIKE
 
     # POCETAK PRONALAZENJA KONTURA
 
@@ -207,6 +109,50 @@ def load_image_and_find_roi_HSV_validate(image_path):
     # plt.imshow(image_crtanje)
 
     return region_distances, sorted_regions
+
+
+def get_percents_for_white_and_black_pixels(img, opening):
+    # get all non black Pixels
+    numWhitePixel = cv2.countNonZero(opening)
+    # print("belih: " + str(numWhitePixel))
+    # get pixel count of image
+    height, width, channels = img.shape
+    numTotalPixel = height * width
+    # print("ukupno: " + str(numTotalPixel))
+    # compute all black pixels
+    numBlackPixel = numTotalPixel - numWhitePixel
+    # print("crnih: " + str(numBlackPixel))
+    percentBlackPixel = numBlackPixel / numTotalPixel * 100;
+    percentWhitePixel = numWhitePixel / numTotalPixel * 100;
+    # print("crnih: " + str(int(percentBlackPixel)) + "%")
+    # print("belih: " + str(int(percentWhitePixel)) + "%")
+    return percentWhitePixel
+
+
+def skew_correction(image, opening):
+    # ISPRAVLJANJE SLIKE
+    # link: https://www.pyimagesearch.com/2017/02/20/text-skew-correction-opencv-python/
+    coords = np.column_stack(np.where(opening > 0))
+    angle = cv2.minAreaRect(coords)[-1]
+    # print("ugao: " + str(angle))
+    if angle < - 45:
+        angle = - (90 + angle)
+    else:
+        angle = -angle
+    # print(angle)
+    (h, w) = image.shape[:2]
+    center = (w // 2, h // 2)
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+    rotirana = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    plt.imshow(rotirana, 'gray')
+    img = rotirana
+    image = img.copy()
+    best_channel = image[:, :, 1]
+    ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
+    invertovana = invert(image_bin)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
+    return img, opening
 
 
 def extract_text(distances, letters, trained_model, vocabulary):
