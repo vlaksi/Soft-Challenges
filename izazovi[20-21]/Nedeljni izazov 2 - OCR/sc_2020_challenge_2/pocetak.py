@@ -24,7 +24,7 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
     imga, contours, hierarchy = cv2.findContours(opening.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     image_crtanje = img.copy()
     regions_array = []
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2)) # ZA MALE REGIONE
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))  # ZA MALE REGIONE
     # print("pronadjeno kontura: " + str(len(contours)))
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
@@ -49,25 +49,29 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
 
 
 def load_image_and_find_roi_HSV_validate(image_path):
-    img = cv2.imread(image_path)
+    image, img, opening = image_segmentation(image_path)
+    percent_white_pixel = get_percents_for_white_and_black_pixels(img, opening)
+    print("procenat belih: " + str(percent_white_pixel))
+    img, opening = skew_correction(image, opening, 1)
+    img, opening, percent_white_pixel = check_better_channel(img, image_path, opening, percent_white_pixel)
+    print("novi procenat belih: " + str(percent_white_pixel))
 
-    image = img.copy()
-    best_channel = image[:, :, 1]
-    ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
-    invertovana = invert(image_bin)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
+    region_distances, sorted_regions = find_roi(img, opening, percent_white_pixel)
 
-    # BROJANJE BROJA BELIH I CRNIH PIKSELA KAKO BIH ZNAO DA LI SU SLOVA VECEG ILI MANJEG FONTA
-    # PA NA OSNOVU TOGA KASNIJE RADIO ODREDJENO SKALIRANJE
-
-    percentWhitePixel = get_percents_for_white_and_black_pixels(img, opening)
-
-    img, opening = skew_correction(image, opening)
+    return region_distances, sorted_regions
 
 
-    # POCETAK PRONALAZENJA KONTURA
+def check_better_channel(img, image_path, opening, percent_white_pixel):
+    if percent_white_pixel > 20:
+        image, img, opening = image_segmentation(image_path, 0)
+        img, opening = skew_correction(image, opening, 0)
 
+    plt.imshow(opening, 'gray')
+    percent_white_pixel = get_percents_for_white_and_black_pixels(img, opening)
+    return img, opening, percent_white_pixel
+
+
+def find_roi(img, opening, percentWhitePixel):
     imga, contours, hierarchy = cv2.findContours(opening.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     image_crtanje = img.copy()
     regions_array = []
@@ -91,9 +95,7 @@ def load_image_and_find_roi_HSV_validate(image_path):
                 continue
         region = cv2.morphologyEx(region.copy(), cv2.MORPH_CLOSE, kernel, iterations=1)
         regions_array.append([resize_region(region), (x, y, w, h)])
-
     regions_array = sorted(regions_array, key=lambda item: item[1][0])
-
     sorted_regions = [region[0] for region in regions_array]
     sorted_rectangles = [region[1] for region in regions_array]
     region_distances = []
@@ -104,14 +106,24 @@ def load_image_and_find_roi_HSV_validate(image_path):
         next_rect = sorted_rectangles[index + 1]
         distance = next_rect[0] - (current[0] + current[2])  # X_next - (X_current + W_current)
         region_distances.append(distance)
-
-    # display_image(image_crtanje)
-    # plt.imshow(image_crtanje)
-
     return region_distances, sorted_regions
 
 
+def image_segmentation(image_path, channel=1):
+    # TODO: ISKORISTITI I OVO U TRAIN-U, mada ne mora jer on je okej za kanal 1
+    img = cv2.imread(image_path)
+    image = img.copy()
+    best_channel = image[:, :, channel]
+    ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
+    invertovana = invert(image_bin)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    opening = cv2.morphologyEx(invertovana, cv2.MORPH_OPEN, kernel, iterations=1)
+    return image, img, opening
+
+
 def get_percents_for_white_and_black_pixels(img, opening):
+    # BROJANJE BROJA BELIH I CRNIH PIKSELA KAKO BIH ZNAO DA LI SU SLOVA VECEG ILI MANJEG FONTA
+    # PA NA OSNOVU TOGA KASNIJE RADIO ODREDJENO SKALIRANJE
     # get all non black Pixels
     numWhitePixel = cv2.countNonZero(opening)
     # print("belih: " + str(numWhitePixel))
@@ -129,7 +141,7 @@ def get_percents_for_white_and_black_pixels(img, opening):
     return percentWhitePixel
 
 
-def skew_correction(image, opening):
+def skew_correction(image, opening, channel=1):
     # ISPRAVLJANJE SLIKE
     # link: https://www.pyimagesearch.com/2017/02/20/text-skew-correction-opencv-python/
     coords = np.column_stack(np.where(opening > 0))
@@ -144,10 +156,9 @@ def skew_correction(image, opening):
     center = (w // 2, h // 2)
     M = cv2.getRotationMatrix2D(center, angle, 1.0)
     rotirana = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-    plt.imshow(rotirana, 'gray')
     img = rotirana
     image = img.copy()
-    best_channel = image[:, :, 1]
+    best_channel = image[:, :, channel]
     ret, image_bin = cv2.threshold(best_channel, 0, 255, cv2.THRESH_OTSU)
     invertovana = invert(image_bin)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
