@@ -52,8 +52,8 @@ def load_image_and_find_roi_HSV_validate(image_path):
     image, img, opening = image_segmentation(image_path)
     percent_white_pixel = get_percents_for_white_and_black_pixels(img, opening)
     print("procenat belih: " + str(percent_white_pixel))
-    img, opening = skew_correction(image, opening, 1)
-    img, opening, percent_white_pixel = check_better_channel(img, image_path, opening, percent_white_pixel)
+    # img, opening = skew_correction(image, opening, 1)
+    img, opening, percent_white_pixel = check_better_channel(image, image_path, opening, percent_white_pixel)
     print("novi procenat belih: " + str(percent_white_pixel))
 
     region_distances, sorted_regions = find_roi(img, opening, percent_white_pixel)
@@ -61,11 +61,12 @@ def load_image_and_find_roi_HSV_validate(image_path):
     return region_distances, sorted_regions
 
 
-def check_better_channel(img, image_path, opening, percent_white_pixel):
+def check_better_channel(image,image_path, opening, percent_white_pixel):
     if percent_white_pixel > 20:
         image, img, opening = image_segmentation(image_path, 0)
         img, opening = skew_correction(image, opening, 0)
-
+    else:
+        img, opening = skew_correction(image, opening, 1)
     plt.imshow(opening, 'gray')
     percent_white_pixel = get_percents_for_white_and_black_pixels(img, opening)
     return img, opening, percent_white_pixel
