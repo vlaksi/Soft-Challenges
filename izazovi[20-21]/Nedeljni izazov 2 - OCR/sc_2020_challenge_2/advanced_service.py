@@ -63,7 +63,7 @@ def create_ann():
     # ann.add(Dense(512, input_dim=784, activation='sigmoid'))
     # ann.add(Dense(128, input_dim=512, activation='sigmoid'))
 
-    ann.add(Dense(250, input_dim=784, activation='sigmoid'))
+    ann.add(Dense(256, input_dim=784, activation='sigmoid'))
     # 2/3 from 784 is 517 + output is 577 neuron
     # ann.add(Dense(128, activation='sigmoid'))
     # ann.add(Dense(30, input_dim=128, activation='sigmoid'))
@@ -76,12 +76,12 @@ def train_ann(ann, X_train, y_train):
     y_train = np.array(y_train, np.float32)
 
     # definisanje parametra algoritma za obucavanje
-    sgd = SGD(lr=0.5, momentum=0.9)
+    opt = SGD(lr=0.5, momentum=0.9)
     # opt = Adam()
-    ann.compile(loss='mean_squared_error', optimizer=sgd)
+    ann.compile(loss='mean_squared_error', optimizer=opt)
     # PROBATI DRUGU LOSS FJU
     # obucavanje neuronske mreze
-    ann.fit(X_train, y_train, epochs=500, batch_size=1, verbose=1, shuffle=True)
+    ann.fit(X_train, y_train, epochs=1000, batch_size=1, verbose=1, shuffle=True)
 
     return ann
 

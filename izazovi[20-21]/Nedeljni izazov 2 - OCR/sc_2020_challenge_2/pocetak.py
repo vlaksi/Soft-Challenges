@@ -66,7 +66,7 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
     imga, contours, hierarchy = cv2.findContours(opening.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     image_crtanje = img.copy()
     regions_array = []
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)) # ZA MALE REGIONE
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2)) # ZA MALE REGIONE
     # print("pronadjeno kontura: " + str(len(contours)))
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
@@ -80,7 +80,7 @@ def load_image_and_find_roi_HSV_TRAIN(image_path):
             continue
         # # ZA SVAKI REGION RADIM POBOLJSANJE
         # TODO: PROVERITI DA LI OVO RADI BOLJE !!!!
-        region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=1)
+        region = cv2.morphologyEx(region.copy(), cv2.MORPH_OPEN, kernel, iterations=1)
 
         regions_array.append([resize_region(region), (x, y, w, h)])
 
@@ -169,7 +169,7 @@ def load_image_and_find_roi_HSV_validate(image_path):
     image_crtanje = img.copy()
     regions_array = []
     # print("pronadjeno kontura: " + str(len(contours)))
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))  # ZA MALE REGIONE
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))  # ZA MALE REGIONE
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
         k = y - 20
@@ -181,12 +181,12 @@ def load_image_and_find_roi_HSV_validate(image_path):
         if (w < 5 + percentWhitePixel) or (h < 25 + percentWhitePixel) or (h + w) < 40:
             # print("w: " + str(w) + " h: " + str(h) + " size: " + str(h + w))
             if h > 20 + percentWhitePixel and w < 10 + percentWhitePixel:  # vrv je I u pitanju
-                region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=1)
+                region = cv2.morphologyEx(region.copy(), cv2.MORPH_OPEN, kernel, iterations=1)
                 regions_array.append([resize_region(region), (x, y, w, h)])
                 continue
             else:  # sum koji samo preskacemo
                 continue
-        region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=1)
+        region = cv2.morphologyEx(region.copy(), cv2.MORPH_OPEN, kernel, iterations=1)
         regions_array.append([resize_region(region), (x, y, w, h)])
 
     regions_array = sorted(regions_array, key=lambda item: item[1][0])
