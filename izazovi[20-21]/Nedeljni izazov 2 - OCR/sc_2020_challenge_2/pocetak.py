@@ -179,13 +179,14 @@ def load_image_and_find_roi_HSV_validate(image_path):
         region = opening[y:y + h + 1,
                  x:x + w + 1]  # UBACITI NEKI HENDLER, tipa pako je y-20 <0 uraditi y - 10 tako nesto
         if (w < 5 + percentWhitePixel) or (h < 25 + percentWhitePixel) or (h + w) < 40:
-            if (h > 30 + percentWhitePixel and w < 10 + percentWhitePixel):  # vrv je I u pitanju
-                region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=3)
+            # print("w: " + str(w) + " h: " + str(h) + " size: " + str(h + w))
+            if h > 20 + percentWhitePixel and w < 10 + percentWhitePixel:  # vrv je I u pitanju
+                region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=1)
                 regions_array.append([resize_region(region), (x, y, w, h)])
                 continue
             else:  # sum koji samo preskacemo
                 continue
-        region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=3)
+        region = cv2.morphologyEx(region.copy(), cv2.MORPH_DILATE, kernel, iterations=1)
         regions_array.append([resize_region(region), (x, y, w, h)])
 
     regions_array = sorted(regions_array, key=lambda item: item[1][0])
