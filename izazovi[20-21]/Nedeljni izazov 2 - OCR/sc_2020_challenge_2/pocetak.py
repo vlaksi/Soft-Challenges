@@ -52,15 +52,83 @@ def load_image_and_find_roi_HSV_validate(image_path):
     image, img, opening = image_segmentation(image_path)
     percent_white_pixel = get_percents_for_white_and_black_pixels(img, opening)
     print("procenat belih: " + str(percent_white_pixel))
-    # img, opening = skew_correction(image, opening, 1)
+
     img, opening, percent_white_pixel = check_better_channel(image, image_path, opening, percent_white_pixel)
     print("novi procenat belih: " + str(percent_white_pixel))
-    if percent_white_pixel > 20:
-        img, opening, percent_white_pixel = advanced_image_segmentation(image_path)
+
+    if percent_white_pixel > 25:
+        # img, opening, percent_white_pixel = advanced_image_segmentation(image_path)
+        img, opening, percent_white_pixel = image_segmentation_in_range(image_path)
+
     print("najnoviji procenat belih: " + str(percent_white_pixel))
+
     region_distances, sorted_regions = find_roi(img, opening, percent_white_pixel)
 
     return region_distances, sorted_regions
+
+
+def image_segmentation_in_range(image_path):
+    img = cv2.imread(image_path)
+    image = img.copy()
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # DEFINISEM GRANICE ZA SVE BOJE KOJE SE UGLAVNOM POJAVLJUJU
+    bgr_collors = []
+    yellow_bgr = (100, 220, 220)
+    bgr_collors.append(yellow_bgr)
+
+    purple_pink_bgr = (230, 182, 213)  # ne radi nesto bas sjajno
+    bgr_collors.append(purple_pink_bgr)
+
+    brown_orange_bgr = (110, 160, 220)
+    bgr_collors.append(brown_orange_bgr)
+
+    light_brown_bgr = (124, 165, 234)  # nije bas sjajno, slika 96
+    bgr_collors.append(light_brown_bgr)
+
+    # primer slike je: 46
+    light_orange_bgr = (50, 170, 210)
+    bgr_collors.append(light_orange_bgr)
+
+    # primer slike je: 47
+    dark_pink_bgr = (193, 170, 230)  # nije bas sjajno, slika 47
+    bgr_collors.append(dark_pink_bgr)
+
+    # primer slike je: 49
+    pink_bgr = (217, 180, 245)  # ne funkcionise bas
+    bgr_collors.append(pink_bgr)
+
+    # primer slike 50
+
+    possible_borders = []
+    for bgr_collor in bgr_collors:
+        lower, upper = get_limits_for_wanted_color(bgr_collor)
+        possible_borders.append([lower, upper])
+
+    # PRODJEM KROZ SVAKU GRANICU I BOJU I VIDIM KOJA IMA NAJMANJI PROCENAT
+    # BELIH PIKSELA, I VEROVATNO JE ONA NAJBOLJE URADILA ODABIR SLOVA
+    best_percent = 101
+    best_mask = None
+    u,l = None, None
+    for border in possible_borders:
+        temp_mask = cv2.inRange(hsv, border[0], border[1])
+        percent_white_pixel = get_percents_for_white_and_black_pixels(img, temp_mask)
+        # print("\t\t\t" + (str(percent_white_pixel)) + "%")
+        if best_percent > percent_white_pixel > 4:
+            best_percent = percent_white_pixel
+            best_mask = temp_mask
+            # print("novi best: " + str(best_percent))
+        l,u = border[0],border[1]
+
+    if best_mask is None:
+        best_mask = cv2.inRange(hsv, l, u)
+    # if best_mask is not None:
+    #     plt.imshow(best_mask, 'gray')
+    #     # KASNIJE MOZDA ITERIRATI I VIDETI ZA KOJU KOMBINACIJU DAJE
+    #     # 'DOBRU RECENICU'
+    # else:
+    #     print("nije nasao koristan range")
+    percent_white_pixel = get_percents_for_white_and_black_pixels(img, best_mask)
+    return img, best_mask, percent_white_pixel
 
 
 def advanced_image_segmentation(image_path):
@@ -87,7 +155,7 @@ def advanced_image_segmentation(image_path):
     return img, opening, percent_white_pixel
 
 
-def check_better_channel(image,image_path, opening, percent_white_pixel):
+def check_better_channel(image, image_path, opening, percent_white_pixel):
     if percent_white_pixel > 20:
         image, img, opening = image_segmentation(image_path, 0)
         img, opening = skew_correction(image, opening, 0)
@@ -256,4 +324,5 @@ def get_limits_for_wanted_color(wanted_bgr_color):
     lower_limit_for_wanted_color = hsv_wanted_color[0][0][0] - 10, 100, 100
     upper_limit_for_wanted_color = hsv_wanted_color[0][0][0] + 10, 255, 255
 
-    return np.array(list(lower_limit_for_wanted_color)), np.array(list(upper_limit_for_wanted_color))
+    return np.array(list(lower_limit_for_wanted_color), dtype="uint8"), np.array(list(upper_limit_for_wanted_color),
+                                                                                 dtype="uint8")
